@@ -28,6 +28,40 @@
   </tbody>
 </table>
 
+<% unless @markers.empty? %>
+  <div id="map" style="width: 600px; height: 400px;"></div>
+  <script>
+  var markers = [];
+  var balloons = [];
+
+  function initMap() {
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: <%= @markers.first.latitude %>, lng: <%= @markers.first.longitude %>},
+      scrollwheel: false,
+      zoom: 12
+    });
+    <% @markers.each_with_index do |marker, i| %>
+      markers[<%= i %>] = new google.maps.Marker({
+        position: {lat: <%= marker.latitude %>, lng: <%= marker.longitude %>},
+        map: map,
+        title: "<%= marker.title %>"
+      });
+      balloons[<%= i %>] = new google.maps.InfoWindow({
+        content: '<div class="balloon"><strong><%= marker.title %></strong><br /><br /><%= marker.description %></div>'
+      });
+      markerEvent(<%= i %>);
+    <% end %>
+  }
+
+  function markerEvent(i) {
+    markers[i].addListener('click', function() {
+      balloons[i].open(map, markers[i]);
+    });
+  }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
+<% end %>
+
 <br>
 
 <%= link_to 'New Marker', new_marker_path %>
